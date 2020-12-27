@@ -1,0 +1,77 @@
+<?php
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function balraj_s190_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+  	$form['siteapikey'] = array (
+      '#type' => 'textfield',
+      '#title' => t ('Site API Key'),
+      '#prefix' => '
+      <details data-drupal-selector="edit-textfield" id="edit-textfield" class="js-form-wrapper form-wrapper seven-details" open="open">
+      	<summary role="button" aria-controls="edit-textfield" aria-expanded="true" aria-pressed="true" class="seven-details__summary">
+      		<span>Site API Key</span>
+    			<span class="summary"></span>
+    		</summary>',
+    	'#suffix' => '</details>',
+    	'#weight' => 1,
+    	'#placeholder' => 'No API Key yet',
+    	'#default_value' => (\Drupal::config('system.site')->get('siteapikey')) ? \Drupal::config('system.site')->get('siteapikey') : '',
+    );
+
+  	//Change submit button text
+  	$form['actions']['submit']['#value'] = t('Update Configuration');
+  	
+  	//Attaching custom form submit handler
+  	$form['actions']['submit']['#submit'][] = 'system_site_information_submit_handler';
+  }
+}
+
+/**
+ * custom submit handler for saving Site Api key
+ */  
+function system_site_information_submit_handler(array $form, FormStateInterface $form_state) {
+	// Getting the form-field value
+	$site_api_values = $form_state->getvalues()['siteapikey'];
+
+	// Retrieving the configuration
+	$config = \Drupal::service('config.factory')->getEditable('system.site');
+
+	// Saving the site api key
+	$config->set('siteapikey', $site_api_values);
+	$config->save();
+
+	//On key save, show message to user
+	if (!empty($site_api_values)) {
+		\Drupal::messenger()->addMessage('Site API Key has been saved with value : '.$site_api_values);
+	} else {
+		\Drupal::messenger()->addMessage('Site API Key has been saved empty');
+	}
+
+}
+
+// helper functions used to convert HTML to JSON object
+function html_to_obj($html) {
+    $dom = new DOMDocument();
+    $dom->loadHTML($html);
+    return element_to_obj($dom->documentElement);
+}
+
+// helper functions used to convert HTML to JSON object
+function element_to_obj($element) {
+    $obj = array( "tag" => $element->tagName );
+    foreach ($element->attributes as $attribute) {
+        $obj[$attribute->name] = $attribute->value;
+    }
+    foreach ($element->childNodes as $subElement) {
+        if ($subElement->nodeType == XML_TEXT_NODE) {
+            $obj["html"] = $subElement->wholeText;
+        }
+        else {
+            $obj["children"][] = element_to_obj($subElement);
+        }
+    }
+    return $obj;
+}

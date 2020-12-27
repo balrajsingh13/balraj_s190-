@@ -1,0 +1,7 @@
+balraj_s190.jsonresp:
+  path: '/page_json/{nid}'
+  defaults:
+    _controller: '\Drupal\balraj_s190\Controller\PageJsonReturnController::getJsonResp'
+    _title: 'Page json response'
+  requirements:
+    _permission: 'access content'
