@@ -1,0 +1,5 @@
+name: Custom Balraj S190
+description: S190 Interest & Competency Check - Drupal.
+package: Custom
+type: module
+core_version_requirement: ^8 || ^9
